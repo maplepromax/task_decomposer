@@ -1,10 +1,8 @@
 export default async function handler(req, res) {
-    // 1. 设置 CORS 头
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    // 处理 OPTIONS 请求
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -25,18 +23,16 @@ export default async function handler(req, res) {
             body: requestBody ? JSON.stringify(requestBody) : undefined,
         });
 
-        // 读取 body（只读取一次）
         const contentType = response.headers.get("content-type") || "";
-        let data;
         
+        // 根据内容类型返回相应格式
         if (contentType.includes("application/json")) {
-            data = await response.json();
+            const data = await response.json();
+            return res.status(response.status).json(data);
         } else {
-            data = await response.text();
+            const data = await response.text();
+            return res.status(response.status).send(data);
         }
-
-        // 直接返回数据，不再尝试读取 response
-        return res.status(response.status).json(data);
 
     } catch (error) {
         return res.status(500).json({
