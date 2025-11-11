@@ -28,21 +28,18 @@ export default async function handler(req, res) {
         // 读取 body（只读取一次）
         const contentType = response.headers.get("content-type") || "";
         let data;
+        
         if (contentType.includes("application/json")) {
             data = await response.json();
         } else {
             data = await response.text();
         }
 
-        // 返回给客户端
-        if (!response.ok) {
-            return res.status(response.status).send(data);
-        }
-
-        res.status(response.status).send(data);
+        // 直接返回数据，不再尝试读取 response
+        return res.status(response.status).json(data);
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             error: "Proxy error",
             details: error.message,
             tip: "请检查 Vercel 环境变量是否正确，以及学校 API 是否正常运行。"
